@@ -22,7 +22,6 @@ console.log(Joi);
         DATABASE_NAME: Joi.string().required(),
       }),
     }),
-    RestaurantsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST,
@@ -37,6 +36,7 @@ console.log(Joi);
     GraphQLModule.forRoot({
       autoSchemaFile: true,
     }),
+    RestaurantsModule,
   ],
 })
 export class AppModule {}
