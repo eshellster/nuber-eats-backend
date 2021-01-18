@@ -7,13 +7,12 @@ import { IsBoolean, IsString, Length } from 'class-validator';
 export class Restaurant {
   @PrimaryGeneratedColumn()
   @Field(() => Number)
-  @IsString()
-  @Length(5, 10)
   id: number;
 
   @Field(() => String)
   @Column()
-  @IsBoolean()
+  @IsString()
+  @Length(3, 10)
   name: string;
 
   @Field(() => Boolean, { nullable: true })
@@ -29,6 +28,6 @@ export class Restaurant {
   @Field(() => String)
   @Column()
   @IsString()
-  @Length(5, 10)
+  @Length(3, 10)
   ownerName: string;
 }
