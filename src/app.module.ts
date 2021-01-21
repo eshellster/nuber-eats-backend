@@ -6,9 +6,7 @@ import * as Joi from 'joi';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/Entities/user.enitites';
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { Restaurant } from './restaurants/entities/restaurant.enities';
-console.log(Joi);
+// console.log(Joi);
 
 @Module({
   imports: [
@@ -34,14 +32,13 @@ console.log(Joi);
       database: process.env.DATABASE_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [User, Restaurant],
+      entities: [User],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
     }),
     UsersModule,
     CommonModule,
-    RestaurantsModule,
   ],
 })
 export class AppModule {}

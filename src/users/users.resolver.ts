@@ -1,4 +1,13 @@
-import { Resolver } from '@nestjs/graphql';
+import { Resolver, Query } from '@nestjs/graphql';
+import { User } from './Entities/user.enitites';
+import { UsersService } from './users.service';
 
-@Resolver()
-export class UsersResolver {}
+@Resolver(() => User)
+export class UsersResolver {
+  constructor(private readonly userService: UsersService) {}
+
+  @Query(() => Boolean)
+  hi() {
+    return true;
+  }
+}
