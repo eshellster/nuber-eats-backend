@@ -14,17 +14,18 @@ export class UsersService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<string | undefined> {
+  }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
     // check new user
     try {
       const exist = await this.users.findOne({ email });
       if (exist) {
         // make error
-        return '등록된 사용자 입니다.';
+        return { ok: false, error: '등록된 사용자 입니다.' };
       }
       await this.users.save(this.users.create({ email, password, role }));
+      return { ok: true };
     } catch (error) {
-      return '사용자 등록에 실패했습니다.';
+      return { ok: false, error: '사용자 등록에 실패했습니다.' };
     }
     // create user & hash the password
   }
