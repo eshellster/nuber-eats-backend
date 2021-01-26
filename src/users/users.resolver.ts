@@ -4,7 +4,7 @@ import {
   CreateAccountInput,
   CreateAccountOutput,
 } from './dtos/create-account.dto';
-import { User } from './Entities/user.enitites';
+import { User } from './Entities/user.entities';
 import { UsersService } from './users.service';
 
 @Resolver(() => User)
@@ -34,5 +34,14 @@ export class UsersResolver {
   }
 
   @Mutation(() => LoginOutput)
-  async login(@Args('input') loginInput: LoginInput) {}
+  async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
+    try {
+      return this.usersService.login(loginInput);
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
 }

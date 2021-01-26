@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
-import { User } from './users/Entities/user.enitites';
+import { User } from './users/Entities/user.entities';
 // console.log(Joi);
 
 @Module({
