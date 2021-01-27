@@ -6,6 +6,7 @@ import * as Joi from 'joi';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/Entities/user.entities';
+import { JwtModule } from './jwt/jwt.module';
 // console.log(Joi);
 
 @Module({
@@ -39,6 +40,7 @@ import { User } from './users/Entities/user.entities';
     }),
     UsersModule,
     CommonModule,
+    JwtModule.forRoot(),
   ],
 })
 export class AppModule {}

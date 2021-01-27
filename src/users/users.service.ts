@@ -6,13 +6,17 @@ import { LoginInput } from './dtos/login.dto';
 import { User } from './Entities/user.entities';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     private readonly config: ConfigService,
-  ) {}
+    private readonly jwtService: JwtService,
+  ) {
+    this.jwtService.hello();
+  }
 
   async createAccount({
     email,
@@ -53,7 +57,7 @@ export class UsersService {
           error: '비밀번호가 유효하지 않습니다.',
         };
       }
-      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
+      const token = 'this.jwtService.hello()';
       return {
         ok: true,
         token,
