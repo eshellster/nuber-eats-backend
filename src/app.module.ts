@@ -20,7 +20,7 @@ import { User } from './users/Entities/user.entities';
         DATABASE_PORT: Joi.string().required(),
         DATABASE_USERNAME: Joi.string().required(),
         DATABASE_PASSWORD: Joi.string().required(),
-        DATABASE_NAME: Joi.string().required(),
+        SECRET_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
