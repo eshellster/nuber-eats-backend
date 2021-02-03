@@ -11,9 +11,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     private readonly jwtService: JwtService,
-  ) {
-    this.jwtService.hello();
-  }
+  ) {}
 
   async createAccount({
     email,
@@ -54,7 +52,7 @@ export class UsersService {
           error: '비밀번호가 유효하지 않습니다.',
         };
       }
-      const token = 'this.jwtService.hello()';
+      const token = this.jwtService.sign(user.id);
       return {
         ok: true,
         token,
