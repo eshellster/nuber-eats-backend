@@ -7,7 +7,7 @@ import { User } from './Entities/user.entities';
 import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     private readonly jwtService: JwtService,
@@ -63,5 +63,8 @@ export class UserService {
         error,
       };
     }
+  }
+  async findById(id: number): Promise<User> {
+    return this.users.findOne({ id });
   }
 }
