@@ -14,6 +14,7 @@ import { User } from './users/Entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
+import { Verification } from './users/Entities/verification.entity';
 // console.log(Joi);
 
 @Module({
@@ -40,7 +41,7 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.DATABASE_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: false,
-      entities: [User],
+      entities: [User, Verification],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
