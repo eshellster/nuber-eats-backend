@@ -25,7 +25,7 @@ export class RestaurantsResolve {
       await this.restaurantService.createRestaurant(createRestaurantDto);
       return true;
     } catch (e) {
-      console.log(e);
+      // console.log(e);
       return false;
     }
   }
@@ -36,7 +36,7 @@ export class RestaurantsResolve {
       await this.restaurantService.updateRestaurant(updateRestaurantDto);
       return true;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
