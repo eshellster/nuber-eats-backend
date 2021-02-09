@@ -49,7 +49,11 @@ export class UsersService {
     password,
   }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
     try {
-      const user = await this.users.findOne({ email });
+      const user = await this.users.findOne(
+        { email },
+        { select: ['id', 'password'] },
+      );
+
       if (!user) {
         return {
           ok: false,
@@ -79,8 +83,9 @@ export class UsersService {
     return this.users.findOne({ id });
   }
 
-  async editProfile(userId: number, { email, password }: EditProfileInput) {
-    const user = await this.users.findOne(userId);
+  async editProfile(id: number, { email, password }: EditProfileInput) {
+    const user = await this.users.findOne(id);
+
     if (email) {
       user.email = email;
       user.verified = false;
@@ -89,6 +94,7 @@ export class UsersService {
     if (password) {
       user.password = password;
     }
+
     return this.users.save(user);
   }
 
@@ -99,7 +105,10 @@ export class UsersService {
     );
     if (verification) {
       verification.user.verified = true;
+      console.log(verification.user);
+
       this.users.save(verification.user);
+      return true;
     }
     return false;
   }
