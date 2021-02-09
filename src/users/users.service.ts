@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateAccountInput } from './dtos/create-account.dto';
-import { LoginInput } from './dtos/login.dto';
+import {
+  CreateAccountInput,
+  CreateAccountOutput,
+} from './dtos/create-account.dto';
+import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './Entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
-import { EditProfileInput } from './dtos/edit-profile.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Verification } from './Entities/verification.entity';
+import * as bcrypt from 'bcrypt';
+import { VerifyEmailOutput } from './dtos/verify-email.dto';
+import { UserProfileOutput } from './dtos/user-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +27,7 @@ export class UsersService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
+  }: CreateAccountInput): Promise<CreateAccountOutput> {
     // check new user
     try {
       const exist = await this.users.findOne({ email });
@@ -29,8 +35,9 @@ export class UsersService {
         // make error
         return { ok: false, error: '등록된 사용자 입니다.' };
       }
+      const hashedassword = await bcrypt.hash(password, 10);
       const user = await this.users.save(
-        this.users.create({ email, password, role }),
+        this.users.create({ email, password: hashedassword, role }),
       );
       await this.verifications.save(
         this.verifications.create({
@@ -44,10 +51,7 @@ export class UsersService {
     // create user & hash the password
   }
 
-  async login({
-    email,
-    password,
-  }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
+  async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user = await this.users.findOne(
         { email },
@@ -79,37 +83,73 @@ export class UsersService {
       };
     }
   }
-  async findById(id: number): Promise<User> {
-    return this.users.findOne({ id });
+  async findById(id: number): Promise<UserProfileOutput> {
+    try {
+      const user = await this.users.findOne({ id });
+      if (user) {
+        return {
+          user,
+          ok: true,
+        };
+      }
+      return {
+        ok: false,
+        error: '사용자를 찾을 수 없습니다.',
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
   }
 
-  async editProfile(id: number, { email, password }: EditProfileInput) {
-    const user = await this.users.findOne(id);
+  async editProfile(
+    id: number,
+    { email, password }: EditProfileInput,
+  ): Promise<EditProfileOutput> {
+    try {
+      const user = await this.users.findOne(id);
 
-    if (email) {
-      user.email = email;
-      user.verified = false;
-      await this.verifications.save(this.verifications.create({ user }));
+      if (email) {
+        user.email = email;
+        user.verified = false;
+        await this.verifications.save(this.verifications.create({ user }));
+      }
+      if (password) {
+        user.password = await bcrypt.hash(password, 10);
+      }
+      await this.users.save(user);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return { ok: false, error: '프로파일 업데이트가 실패 했습니다.' };
     }
-    if (password) {
-      user.password = password;
-    }
-
-    return this.users.save(user);
   }
 
-  async verifyEmail(code: string): Promise<boolean> {
-    const verification = await this.verifications.findOne(
-      { code },
-      { relations: ['user'] },
-    );
-    if (verification) {
-      verification.user.verified = true;
-      console.log(verification.user);
-
-      this.users.save(verification.user);
-      return true;
+  async verifyEmail(code: string): Promise<VerifyEmailOutput> {
+    try {
+      const verification = await this.verifications.findOne(
+        { code },
+        { relations: ['user'] },
+      );
+      if (verification) {
+        verification.user.verified = true;
+        this.users.save(verification.user);
+        return {
+          ok: true,
+        };
+      }
+      return {
+        ok: false,
+        error: '확인코드가 발견되지 않았습니다.',
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
     }
-    return false;
   }
 }
