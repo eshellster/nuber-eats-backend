@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
-import { CreateAccountInput } from './dtos/create-account.dto';
+import { Repository } from 'typeorm';
 import { User } from './Entities/user.entity';
 import { Verification } from './Entities/verification.entity';
 import { UsersService } from './users.service';
@@ -21,18 +21,11 @@ const mockMailService = {
   sendVerificationEmail: jest.fn(),
 };
 
-class MockRepository {
-  async findOne() {
-    const user: User = new User();
-    user.id = 1;
-    user.email = '';
-    return user;
-  }
-}
+type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 describe('UsersService', () => {
   let service: UsersService;
-
+  let usersRepository: MockRepository<User>;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -40,7 +33,6 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository,
-          useClass: MockRepository,
         },
         {
           provide: getRepositoryToken(Verification),
@@ -58,6 +50,7 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
+    usersRepository = module.get(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -65,6 +58,10 @@ describe('UsersService', () => {
   });
   describe('createAccount', () => {
     it('사용자가 존재하는 경우 실패를 반환한다.', async () => {
+      usersRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: '',
+      });
       const result = await service.createAccount({
         email: '',
         password: '',
