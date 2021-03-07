@@ -121,11 +121,26 @@ describe('UsersService', () => {
         password: '',
         role: 1,
       });
-      console.log(result);
 
       expect(result).toEqual({
         ok: false,
         error: '사용자 등록에 실패했습니다.',
+      });
+    });
+  });
+
+  describe('login', () => {
+    it('실패유도: 사용자가 없다면', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+      const result = await service.login({ email: '', password: '' });
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+      );
+      expect(result).toMatchObject({
+        ok: false,
+        error: '사용자가 없습니다.',
       });
     });
   });
