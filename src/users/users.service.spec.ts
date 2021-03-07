@@ -15,7 +15,7 @@ const mockRepository = () => ({
   create: jest.fn(),
 });
 const mockJwtService = {
-  sign: jest.fn(),
+  sign: jest.fn(() => 'signed-token'),
   verify: jest.fn(),
 };
 const mockMailService = {
@@ -30,6 +30,7 @@ describe('UsersService', () => {
   let usersRepository: MockRepository<User>;
   let verificationsRepository: MockRepository<Verification>;
   let mailService: MailService;
+  let jwtService: JwtService;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -55,6 +56,7 @@ describe('UsersService', () => {
 
     service = module.get<UsersService>(UsersService);
     mailService = module.get<MailService>(MailService);
+    jwtService = module.get<JwtService>(JwtService);
     usersRepository = module.get(getRepositoryToken(User));
     verificationsRepository = module.get(getRepositoryToken(Verification));
   });
@@ -63,7 +65,7 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
   });
   describe('createAccount', () => {
-    const createAccountArgs = {
+    const createAccountHashedPasswordArgs = {
       email: '',
       password: expect.any(String),
       role: 0,
@@ -73,7 +75,9 @@ describe('UsersService', () => {
         id: 1,
         email: '',
       });
-      const result = await service.createAccount(createAccountArgs);
+      const result = await service.createAccount(
+        createAccountHashedPasswordArgs,
+      );
 
       expect(result).toMatchObject({
         ok: false,
@@ -82,10 +86,10 @@ describe('UsersService', () => {
     });
     it('성공유도: 등록 가능한 사용자계정이면 저장한다.', async () => {
       usersRepository.findOne.mockResolvedValue(undefined);
-      usersRepository.create.mockResolvedValue(createAccountArgs);
-      usersRepository.save.mockResolvedValue(createAccountArgs);
+      usersRepository.create.mockResolvedValue(createAccountHashedPasswordArgs);
+      usersRepository.save.mockResolvedValue(createAccountHashedPasswordArgs);
       verificationsRepository.create.mockResolvedValue({
-        user: createAccountArgs,
+        user: createAccountHashedPasswordArgs,
       });
       verificationsRepository.save.mockResolvedValue({
         code: 'code',
@@ -97,14 +101,18 @@ describe('UsersService', () => {
       });
 
       expect(usersRepository.create).toHaveBeenCalledTimes(1);
-      expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+      expect(usersRepository.create).toHaveBeenCalledWith(
+        createAccountHashedPasswordArgs,
+      );
 
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
-      expect(usersRepository.save).toHaveBeenCalledWith(expect.any(Object));
+      expect(usersRepository.save).toHaveBeenCalledWith(
+        Promise.resolve(createAccountHashedPasswordArgs),
+      );
 
       expect(verificationsRepository.save).toHaveBeenCalledTimes(1);
       expect(verificationsRepository.save).toHaveBeenCalledWith(
-        expect.any(Object),
+        Promise.resolve(createAccountHashedPasswordArgs),
       );
 
       expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
@@ -130,9 +138,15 @@ describe('UsersService', () => {
   });
 
   describe('login', () => {
+    const loginArgs = {
+      email: 'bs@email.com',
+      password: 'bs.password',
+    };
     it('실패유도: 사용자가 없다면', async () => {
       usersRepository.findOne.mockResolvedValue(null);
-      const result = await service.login({ email: '', password: '' });
+
+      const result = await service.login(loginArgs);
+
       expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
       expect(usersRepository.findOne).toHaveBeenCalledWith(
         expect.any(Object),
@@ -142,6 +156,28 @@ describe('UsersService', () => {
         ok: false,
         error: '사용자가 없습니다.',
       });
+    });
+    it('실패유도: 사용자가 있고 패스워드가 다르다면.', async () => {
+      const mockedUser = {
+        checkPassword: jest.fn(() => Promise.resolve(false)),
+      };
+      usersRepository.findOne.mockResolvedValue(mockedUser);
+      const result = await service.login(loginArgs);
+      expect(result).toEqual({
+        ok: false,
+        error: '비밀번호가 유효하지 않습니다.',
+      });
+    });
+    it('성공유도: 사용자가 있고 패스워드도 일치한다.', async () => {
+      const mockedUser = {
+        id: 1,
+        checkPassword: jest.fn(() => Promise.resolve(true)),
+      };
+      usersRepository.findOne.mockResolvedValue(mockedUser);
+      const result = await service.login(loginArgs);
+      expect(jwtService.sign).toHaveBeenCalledTimes(1);
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.any(Number));
+      expect(result).toEqual({ ok: true, token: 'signed-token' });
     });
   });
 
