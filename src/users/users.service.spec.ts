@@ -68,18 +68,19 @@ describe('UsersService', () => {
       password: expect.any(String),
       role: 0,
     };
-    it('사용자가 존재하는 경우 실패를 반환한다.', async () => {
+    it('실패유도: 사용자가 존재하는 경우', async () => {
       usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: '',
       });
       const result = await service.createAccount(createAccountArgs);
+
       expect(result).toMatchObject({
         ok: false,
         error: '등록된 사용자 입니다.',
       });
     });
-    it('등록 가능한 사용자계정이면 저장한다.', async () => {
+    it('성공유도: 등록 가능한 사용자계정이면 저장한다.', async () => {
       usersRepository.findOne.mockResolvedValue(undefined);
       usersRepository.create.mockResolvedValue(createAccountArgs);
       usersRepository.save.mockResolvedValue(createAccountArgs);
@@ -113,9 +114,22 @@ describe('UsersService', () => {
       );
       expect(result).toEqual({ ok: true });
     });
+    it('실패유도: 에러가 발생해 사용자 등록이 실패했을 때', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.createAccount({
+        email: '',
+        password: '',
+        role: 1,
+      });
+      console.log(result);
+
+      expect(result).toEqual({
+        ok: false,
+        error: '사용자 등록에 실패했습니다.',
+      });
+    });
   });
 
-  it.todo('login');
   it.todo('findById');
   it.todo('editProfile');
   it.todo('verifyEmail');
