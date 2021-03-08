@@ -168,7 +168,7 @@ describe('UsersService', () => {
         error: '비밀번호가 유효하지 않습니다.',
       });
     });
-    it('성공유도: 사용자가 있고 패스워드도 일치한다.', async () => {
+    it('성공유도: 사용자가 있고 패스워드도 일치한면 토큰을 반환', async () => {
       const mockedUser = {
         id: 1,
         checkPassword: jest.fn(() => Promise.resolve(true)),
@@ -179,9 +179,47 @@ describe('UsersService', () => {
       expect(jwtService.sign).toHaveBeenCalledWith(expect.any(Number));
       expect(result).toEqual({ ok: true, token: 'signed-token' });
     });
+    it('실패유도: 로그인 과정중에 에러발생 ', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.login(loginArgs);
+      expect(result).toMatchObject({
+        ok: false,
+        error: '로그인에 실패하였습니다.',
+      });
+    });
   });
 
-  it.todo('findById');
+  describe('findById', () => {
+    const findByIdArgs = {
+      id: 1,
+    };
+    it('실패유도: 사용자 아이디가 존재하지 않는다면', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+      const result = await service.findById(1);
+      expect(result).toEqual({
+        ok: false,
+        error: '사용자를 찾을 수 없습니다.',
+      });
+    });
+
+    it('실패유도: 에러발생', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.findById(1);
+      expect(result).toEqual({
+        ok: false,
+        error: expect.any(Object),
+      });
+    });
+
+    it('성공유도: 사용자가 존재한다면 user를 반환', async () => {
+      usersRepository.findOne.mockResolvedValue(findByIdArgs);
+      const result = await service.findById(1);
+      expect(result).toMatchObject({
+        ok: true,
+        user: findByIdArgs,
+      });
+    });
+  });
   it.todo('editProfile');
   it.todo('verifyEmail');
 });

@@ -82,7 +82,7 @@ export class UsersService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: '로그인에 실패하였습니다.',
       };
     }
   }
