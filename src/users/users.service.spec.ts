@@ -87,7 +87,7 @@ describe('UsersService', () => {
     });
     it('성공유도: 등록 가능한 사용자계정이면 저장한다.', async () => {
       usersRepository.findOne.mockResolvedValue(undefined);
-      usersRepository.create.mockResolvedValue(createAccountHashedPasswordArgs);
+      usersRepository.create.mockReturnValue(createAccountHashedPasswordArgs);
       usersRepository.save.mockResolvedValue(createAccountHashedPasswordArgs);
       verificationsRepository.create.mockResolvedValue({
         user: createAccountHashedPasswordArgs,
@@ -108,7 +108,7 @@ describe('UsersService', () => {
 
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(
-        Promise.resolve(createAccountHashedPasswordArgs),
+        createAccountHashedPasswordArgs,
       );
 
       expect(verificationsRepository.save).toHaveBeenCalledTimes(1);
@@ -212,6 +212,55 @@ describe('UsersService', () => {
       });
     });
   });
-  it.todo('editProfile');
+  describe('editProfile', () => {
+    it('실패유도: 사용자 프로파일 수정 에러발생', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.editProfile(1, { email: '', password: '' });
+      expect(result).toMatchObject({
+        ok: false,
+        error: '프로파일 업데이트가 실패 했습니다.',
+      });
+    });
+
+    it('성공유도: 사용자프로파일 email 수정', async () => {
+      usersRepository.findOne.mockResolvedValue({
+        email: 'user@old.com',
+        verified: true,
+      });
+      verificationsRepository.create.mockReturnValue({
+        code: 'code',
+      });
+      verificationsRepository.save.mockResolvedValue({
+        code: 'code',
+      });
+      const result = await service.editProfile(1, {
+        email: 'user@new.com',
+        verified: false,
+      });
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledWith(1);
+
+      expect(verificationsRepository.create).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.create).toHaveBeenCalledWith({
+        user: { verified: false, email: 'user@new.com' },
+      });
+      expect(verificationsRepository.save).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.save).toHaveBeenCalledWith({
+        code: 'code',
+      });
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith({
+        verified: false,
+        email: 'user@new.com',
+      });
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
+        'user@new.com',
+        'code',
+      );
+      expect(result).toMatchObject({
+        ok: true,
+      });
+    });
+  });
   it.todo('verifyEmail');
 });
