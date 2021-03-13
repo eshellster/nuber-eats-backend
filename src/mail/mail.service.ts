@@ -3,17 +3,18 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as FormData from 'form-data';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { EmailVar, MailModuleOptions } from './mail.interfaces';
+import { SendEmailOutput } from './dtos/sendEmail.dto';
 
 @Injectable()
 export class MailService {
   constructor(
     @Inject(CONFIG_OPTIONS) private readonly options: MailModuleOptions,
   ) {}
-  private async sendEmail(
+  async sendEmail(
     subject: string,
     template: string,
     emailVar: EmailVar[],
-  ) {
+  ): Promise<SendEmailOutput> {
     const form = new FormData();
     form.append('from', `from edynote <mailgun@${this.options.domain}>`);
     form.append('to', emailVar[1].value);
@@ -21,17 +22,25 @@ export class MailService {
     form.append('template', template);
     emailVar.forEach((eVar) => form.append(`v:${eVar.key}`, eVar.value));
     try {
-      await got(`https://api.mailgun.net/v3/${this.options.domain}/messages`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${Buffer.from(
-            `api:${this.options.apiKey}`,
-          ).toString('base64')}`,
+      await got.post(
+        `https://api.mailgun.net/v3/${this.options.domain}/messages`,
+        {
+          headers: {
+            Authorization: `Basic ${Buffer.from(
+              `api:${this.options.apiKey}`,
+            ).toString('base64')}`,
+          },
+          body: form,
         },
-        body: form,
-      });
+      );
+      return {
+        ok: true,
+      };
     } catch (error) {
-      console.log(error);
+      return {
+        ok: false,
+        error,
+      };
     }
   }
   sendVerificationEmail(email: string, code: string) {
