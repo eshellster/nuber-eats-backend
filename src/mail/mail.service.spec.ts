@@ -3,7 +3,6 @@ import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { MailService } from './mail.service';
 import got from 'got';
 import * as FormData from 'form-data';
-import { SendEmailOutput } from './dtos/sendEmail.dto';
 
 jest.mock('got');
 jest.mock('form-data');
