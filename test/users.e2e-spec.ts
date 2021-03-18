@@ -5,6 +5,7 @@ import { AppModule } from './../src/app.module';
 import { getConnection, Repository } from 'typeorm';
 import { User } from 'src/users/Entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { isEmail } from 'class-validator';
 
 jest.mock('got', () => {
   return {
@@ -299,6 +300,63 @@ describe('AppController (e2e)', () => {
         });
     });
   });
-  it.todo('verifyEmail');
-  it.todo('editProfile');
+  describe('editProfile', () => {
+    const NEW_EMAIL = 'new@email.com';
+    it('should change email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+        mutation{
+          editProfile(input:{email:"${NEW_EMAIL}"
+          }){
+            ok
+            error
+          }
+        }
+        `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+    it('should have new email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+         {
+           me{
+             email
+           }
+         } 
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(NEW_EMAIL);
+        });
+    });
+  });
+  describe('verifyEmail', () => {
+    it('should verifitation email', () => {});
+  });
 });
