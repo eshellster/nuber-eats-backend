@@ -1,5 +1,5 @@
 import { InputType, OmitType } from '@nestjs/graphql';
-import { Restaurant } from '../entities/restaurant.enities';
+import { Restaurant } from '../entities/restaurant.entity';
 
 @InputType()
 export class CreateRestaurantDto extends OmitType(
