@@ -1,5 +1,8 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role.decorator';
+import { RolesGuard } from 'src/auth/role.guard';
 import { User } from 'src/users/Entities/user.entity';
 import {
   CreateRestaurantInput,
@@ -12,6 +15,8 @@ import { RestaurantService } from './restaurants.service';
 export class RestaurantsResolve {
   constructor(private readonly restaurantService: RestaurantService) {}
   @Mutation(() => CreateRestaurantOutput)
+  @UseGuards(RolesGuard)
+  @Role(['Owner'])
   async createRestaurant(
     @AuthUser() authUser: User,
     @Args('input') createRestaurantInputType: CreateRestaurantInput,
