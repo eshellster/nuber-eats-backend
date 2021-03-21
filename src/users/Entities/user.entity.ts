@@ -11,7 +11,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
-enum UserRole { // <-- DB
+export enum UserRole { // <-- DB
   Client = 'Client',
   Owner = 'Owner',
   Delivery = 'Delivery',

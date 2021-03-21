@@ -19,6 +19,7 @@ import { MailModule } from './mail/mail.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { AuthGuard } from './auth/auth.guard';
 // console.log(Joi);
 
 @Module({
@@ -53,9 +54,11 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
     GraphQLModule.forRoot({
       autoSchemaFile: true,
       // context: () => ({ jump: true }),
+      context: ({ req }) => ({ user: req['user'] }),
     }),
     UsersModule,
     RestaurantsModule,
+    AuthGuard,
     CommonModule,
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
