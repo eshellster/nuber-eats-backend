@@ -82,28 +82,24 @@ export class UsersService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: '로그인에 실패하였습니다.',
       };
     }
   }
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOne({ id });
+      const user = await this.users.findOneOrFail({ id });
       if (user) {
         return {
           user,
           ok: true,
         };
       }
-      return {
-        ok: false,
-        error: '사용자를 찾을 수 없습니다.',
-      };
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: '사용자를 찾을 수 없습니다.',
       };
     }
   }
@@ -118,6 +114,7 @@ export class UsersService {
       if (email) {
         user.email = email;
         user.verified = false;
+        await this.verifications.delete({ user: { id: user.id } });
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );
