@@ -165,13 +165,14 @@ export class RestaurantService {
         take: limit,
         skip: (page - 1) * limit,
       });
-      category.restaurants = restaurants;
+      // category.restaurants = restaurants;
 
       const totalResults = await this.countRestaurants(category);
       console.log(totalResults);
       return {
         ok: true,
         category,
+        restaurants,
         totalPages: Math.ceil(totalResults / limit),
       };
     } catch (error) {
