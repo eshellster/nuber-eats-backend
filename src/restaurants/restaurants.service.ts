@@ -148,6 +148,7 @@ export class RestaurantService {
   async findCategoryBySlug({
     slug,
     page,
+    limit,
   }: CategoryInput): Promise<CategoryOutput> {
     try {
       const category = await this.categories.findOne({ slug });
@@ -161,8 +162,8 @@ export class RestaurantService {
         where: {
           category,
         },
-        take: 25,
-        skip: (page - 1) * 25,
+        take: limit,
+        skip: (page - 1) * limit,
       });
       category.restaurants = restaurants;
 
@@ -171,7 +172,7 @@ export class RestaurantService {
       return {
         ok: true,
         category,
-        totalPages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / limit),
       };
     } catch (error) {
       return {
