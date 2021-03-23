@@ -140,4 +140,7 @@ export class RestaurantService {
       };
     }
   }
+  countRestaurants(category: Category) {
+    return this.restaurnats.count({ category });
+  }
 }
