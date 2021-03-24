@@ -246,7 +246,9 @@ export class RestaurantService {
       take: limit,
       skip: (page - 1) * limit,
     });
-    if (!restaurants) {
+    console.log(restaurants.length);
+
+    if (!restaurants || restaurants.length === 0) {
       return {
         ok: false,
         error: '레스토랑을 찾을 수 없습니다.',
