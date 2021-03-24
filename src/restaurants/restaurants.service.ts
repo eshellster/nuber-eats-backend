@@ -1,7 +1,7 @@
-import { Injectable, Query } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/Entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
@@ -18,6 +18,10 @@ import {
 } from './dtos/edit-restaurant.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
+import {
+  SearchRestaurantsInput,
+  SearchRestaurantsOutput,
+} from './dtos/search-restaurants.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
@@ -193,7 +197,6 @@ export class RestaurantService {
       // category.restaurants = restaurants;
 
       const totalResults = await this.countRestaurants(category);
-      console.log(totalResults);
       return {
         ok: true,
         category,
@@ -222,6 +225,39 @@ export class RestaurantService {
       return {
         ok: true,
         restaurant,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async searchRestaurants({
+    query,
+    page,
+    limit,
+  }: SearchRestaurantsInput): Promise<SearchRestaurantsOutput> {
+    const [restaurants, totalResults] = await this.restaurnats.findAndCount({
+      where: {
+        name: Like(`%${query}%`),
+      },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+    if (!restaurants) {
+      return {
+        ok: false,
+        error: '레스토랑을 찾을 수 없습니다.',
+      };
+    }
+    try {
+      return {
+        ok: true,
+        restaurants,
+        totalPages: Math.ceil(totalResults / 25),
+        totalResults,
       };
     } catch (error) {
       return {

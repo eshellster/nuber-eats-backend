@@ -1,6 +1,5 @@
 import {
   Args,
-  ArgsType,
   Int,
   Mutation,
   Parent,
@@ -27,6 +26,10 @@ import {
 } from './dtos/edit-restaurant.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
+import {
+  SearchRestaurantsInput,
+  SearchRestaurantsOutput,
+} from './dtos/search-restaurants.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantService } from './restaurants.service';
@@ -97,8 +100,15 @@ export class CategoryResolve {
 
   @Query(() => RestaurantOutput)
   restaurant(
-    @Args('Input') rastaurantInput: RestaurantInput,
+    @Args('input') rastaurantInput: RestaurantInput,
   ): Promise<RestaurantOutput> {
     return this.restaurantService.findRestaurantById(rastaurantInput);
+  }
+
+  @Query(() => SearchRestaurantsOutput)
+  searchRestaurants(
+    @Args('input') searchRestaurants: SearchRestaurantsInput,
+  ): Promise<SearchRestaurantsOutput> {
+    return this.restaurantService.searchRestaurants(searchRestaurants);
   }
 }
