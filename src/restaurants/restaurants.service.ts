@@ -9,10 +9,12 @@ import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
 } from './dtos/create-restaurant.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/delete-dish.dto';
 import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from './dtos/delete-restaurant.dto';
+import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
 import {
   EditRestaurantInput,
   EditRestaurantOutput,
@@ -293,6 +295,70 @@ export class RestaurantService {
     await this.dishes.save(
       this.dishes.create({ ...createDishInput, restaurant }),
     );
+    try {
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(editDishInput.dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return {
+          ok: false,
+          error: '요리를 찾을 수 없습니다.',
+        };
+      }
+      if (owner.id !== dish.restaurant.ownerId) {
+        return {
+          ok: false,
+          error: '요리 정보를 수정할 권한이 없습니다.',
+        };
+      }
+      await this.dishes.save([{ id: editDishInput.dishId, ...editDishInput }]);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<DeleteDishOutput> {
+    const dish = await this.dishes.findOne(dishId, {
+      relations: ['restaurant'],
+    });
+    if (!dish) {
+      return {
+        ok: false,
+        error: '요리를 찾을 수 없습니다.',
+      };
+    }
+    if (owner.id !== dish.restaurant.ownerId) {
+      return {
+        ok: false,
+        error: '요리 정보를 삭제할 권한이 없습니다.',
+      };
+    }
+    await this.dishes.delete(dishId);
     try {
       return {
         ok: true,
