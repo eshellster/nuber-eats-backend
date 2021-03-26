@@ -24,6 +24,7 @@ import {
   SearchRestaurantsOutput,
 } from './dtos/search-restaurants.dto';
 import { Category } from './entities/category.entity';
+import { Dish } from './entities/dish.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
 
@@ -32,6 +33,7 @@ export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurnats: Repository<Restaurant>,
+    @InjectRepository(Dish) private readonly dishes: Repository<Dish>,
     private readonly categories: CategoryRepository,
   ) {}
 
@@ -273,6 +275,24 @@ export class RestaurantService {
     owner: User,
     createDishInput: CreateDishInput,
   ): Promise<CreateDishOutput> {
+    const restaurant = await this.restaurnats.findOne(
+      createDishInput.restaurantId,
+    );
+    if (!restaurant) {
+      return {
+        ok: false,
+        error: '레스토랑을 찾을 수 없습니다.',
+      };
+    }
+    if (owner.id !== restaurant.ownerId) {
+      return {
+        ok: false,
+        error: '레스토랑 소유주가 아닙니다.',
+      };
+    }
+    await this.dishes.save(
+      this.dishes.create({ ...createDishInput, restaurant }),
+    );
     try {
       return {
         ok: true,
