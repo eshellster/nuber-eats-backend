@@ -279,6 +279,7 @@ export class RestaurantService {
   ): Promise<CreateDishOutput> {
     const restaurant = await this.restaurnats.findOne(
       createDishInput.restaurantId,
+      { relations: ['menu'] },
     );
     if (!restaurant) {
       return {
@@ -290,6 +291,15 @@ export class RestaurantService {
       return {
         ok: false,
         error: '레스토랑 소유주가 아닙니다.',
+      };
+    }
+    const isExist = restaurant.menu
+      .map((dish) => dish.name)
+      .includes(createDishInput.name);
+    if (isExist) {
+      return {
+        ok: false,
+        error: '같은 이름의 요리가 존재합니다.',
       };
     }
     await this.dishes.save(
