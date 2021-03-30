@@ -21,6 +21,8 @@ import { Category } from './restaurants/entities/category.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { AuthGuard } from './auth/auth.guard';
 import { Dish } from './restaurants/entities/dish.entity';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/enties/order.entity';
 // console.log(Joi);
 
 @Module({
@@ -50,7 +52,7 @@ import { Dish } from './restaurants/entities/dish.entity';
       database: process.env.DATABASE_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: false,
-      entities: [User, Verification, Restaurant, Category, Dish],
+      entities: [User, Verification, Restaurant, Category, Dish, Order],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
@@ -70,6 +72,7 @@ import { Dish } from './restaurants/entities/dish.entity';
       domain: process.env.MAILGUN_DOMAIN_NAME,
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
+    OrdersModule,
   ],
 })
 export class AppModule implements NestModule {
