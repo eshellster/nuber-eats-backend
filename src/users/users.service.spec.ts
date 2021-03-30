@@ -70,7 +70,7 @@ describe('UsersService', () => {
     const createAccountHashedPasswordArgs = {
       email: '',
       password: expect.any(String),
-      role: 0,
+      role: expect.any(String),
     };
     it('실패유도: 사용자가 존재하는 경우', async () => {
       usersRepository.findOne.mockResolvedValue({
@@ -99,7 +99,7 @@ describe('UsersService', () => {
       const result = await service.createAccount({
         email: '',
         password: '',
-        role: 0,
+        role: expect.any(String),
       });
 
       expect(usersRepository.create).toHaveBeenCalledTimes(1);
@@ -129,7 +129,7 @@ describe('UsersService', () => {
       const result = await service.createAccount({
         email: '',
         password: '',
-        role: 1,
+        role: expect.any(String),
       });
 
       expect(result).toEqual({
