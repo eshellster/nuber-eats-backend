@@ -56,7 +56,7 @@ export class Order extends CoreEntity {
   @IsNumber()
   total: number;
 
-  @Column({ type: 'enum', enum: OrderStatus })
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending }) // service에서 설정하지 않아도 되어서 일을 덜어준다.
   @Field(() => OrderStatus)
   @IsEnum(OrderStatus)
   status: OrderStatus;

@@ -220,7 +220,10 @@ export class RestaurantService {
     restaurantId,
   }: RestaurantInput): Promise<RestaurantOutput> {
     try {
-      const restaurant = await this.restaurnats.findOne({ id: restaurantId });
+      const restaurant = await this.restaurnats.findOne(
+        { id: restaurantId },
+        { relations: ['menu'] },
+      );
       if (!restaurant) {
         return {
           ok: false,
