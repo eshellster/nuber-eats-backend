@@ -30,7 +30,7 @@ export class Order extends CoreEntity {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  costomer?: User;
+  customer?: User;
 
   @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user) => user.rides, {
@@ -49,7 +49,7 @@ export class Order extends CoreEntity {
   @Field(() => [OrderItem])
   @ManyToMany(() => OrderItem)
   @JoinTable()
-  orderItem: OrderItem[];
+  orderItems: OrderItem[];
 
   @Column()
   @Field(() => Float)

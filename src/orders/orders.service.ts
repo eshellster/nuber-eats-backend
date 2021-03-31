@@ -3,8 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/Entities/user.entity';
-import { In, Repository } from 'typeorm';
-import { isTemplateSpan } from 'typescript';
+import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
 import { OrderItem } from './enties/order-item.entity';
 import { Order } from './enties/order.entity';
@@ -21,7 +20,7 @@ export class OrdersService {
   ) {}
 
   async createOrder(
-    costomer: User,
+    customer: User,
     { restaurantId, orderItems }: CreateOrderInput,
   ): Promise<CreateOrderOutput> {
     try {
@@ -32,18 +31,51 @@ export class OrdersService {
           error: '레스토랑이 존제하지 않습니다.',
         };
       }
-      orderItems.forEach(async (item) => {
-        const dish = await this.dishes.findOne(item.dishId);
+      let orderFinalPrice = 0;
+      const newOrderList: OrderItem[] = [];
+      for (const orderItem of orderItems) {
+        const dish = await this.dishes.findOne(orderItem.dishId);
         if (!dish) {
-          // abort this whole thing
+          return {
+            ok: false,
+            error: '요리를 찾을 수 없습니다.',
+          };
         }
-        await this.orderItems.save(
+        let dishFinalPrice = dish.price;
+        for (const orderItemOption of orderItem.options) {
+          const dishOption = dish.options.find(
+            (options) => options.name === orderItemOption.name,
+          );
+          if (dishOption) {
+            if (dishOption.extra) {
+              dishFinalPrice = dishFinalPrice + dishOption.extra;
+            }
+            const dishOptionChoice = dishOption.choices?.find(
+              (choices) => choices.name === orderItemOption.choice,
+            );
+            if (dishOptionChoice?.extra) {
+              dishFinalPrice = dishFinalPrice + dishOptionChoice.extra;
+            }
+          }
+        }
+        orderFinalPrice = orderFinalPrice + dishFinalPrice;
+        const item = await this.orderItems.save(
           this.orderItems.create({
             dish,
-            options: item.options,
+            options: orderItem.options,
           }),
         );
-      });
+        newOrderList.push(item);
+      }
+      await this.orders.save(
+        this.orders.create({
+          customer,
+          restaurant,
+          total: orderFinalPrice,
+          orderItems: newOrderList,
+        }),
+      );
+
       return {
         ok: true,
       };
