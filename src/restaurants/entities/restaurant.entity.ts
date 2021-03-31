@@ -6,7 +6,6 @@ import { Category } from './category.entity';
 import { User } from 'src/users/Entities/user.entity';
 import { Dish } from './dish.entity';
 import { Order } from 'src/orders/enties/order.entity';
-import { RestaurantInput } from '../dtos/restaurant.dto';
 
 @InputType('RestaurantInputType', { isAbstract: true })
 @ObjectType()
