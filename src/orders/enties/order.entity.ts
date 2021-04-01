@@ -49,7 +49,7 @@ export class Order extends CoreEntity {
   @Field(() => [OrderItem])
   @ManyToMany(() => OrderItem)
   @JoinTable()
-  orderItems: OrderItem[];
+  items: OrderItem[];
 
   @Column()
   @Field(() => Float)

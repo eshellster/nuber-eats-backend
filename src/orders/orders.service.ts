@@ -21,7 +21,7 @@ export class OrdersService {
 
   async createOrder(
     customer: User,
-    { restaurantId, orderItems }: CreateOrderInput,
+    { restaurantId, items }: CreateOrderInput,
   ): Promise<CreateOrderOutput> {
     try {
       const restaurant = await this.restaurants.findOne(restaurantId);
@@ -32,9 +32,9 @@ export class OrdersService {
         };
       }
       let orderFinalPrice = 0;
-      const newOrderList: OrderItem[] = [];
-      for (const orderItem of orderItems) {
-        const dish = await this.dishes.findOne(orderItem.dishId);
+      const orderItems: OrderItem[] = [];
+      for (const item of items) {
+        const dish = await this.dishes.findOne(item.dishId);
         if (!dish) {
           return {
             ok: false,
@@ -42,7 +42,7 @@ export class OrdersService {
           };
         }
         let dishFinalPrice = dish.price;
-        for (const orderItemOption of orderItem.options) {
+        for (const orderItemOption of item.options) {
           const dishOption = dish.options.find(
             (options) => options.name === orderItemOption.name,
           );
@@ -59,20 +59,20 @@ export class OrdersService {
           }
         }
         orderFinalPrice = orderFinalPrice + dishFinalPrice;
-        const item = await this.orderItems.save(
+        const orderItem = await this.orderItems.save(
           this.orderItems.create({
             dish,
-            options: orderItem.options,
+            options: item.options,
           }),
         );
-        newOrderList.push(item);
+        orderItems.push(orderItem);
       }
       await this.orders.save(
         this.orders.create({
           customer,
           restaurant,
           total: orderFinalPrice,
-          orderItems: newOrderList,
+          items: orderItems,
         }),
       );
 

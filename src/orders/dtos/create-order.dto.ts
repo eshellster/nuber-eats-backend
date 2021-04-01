@@ -5,7 +5,7 @@ import { CreateOrderItemInput } from './create-order-item.dto';
 @InputType()
 export class CreateOrderInput {
   @Field(() => [CreateOrderItemInput])
-  orderItems: CreateOrderItemInput[];
+  items: CreateOrderItemInput[];
 
   @Field(() => Int)
   restaurantId: number;
