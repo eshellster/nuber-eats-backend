@@ -61,6 +61,7 @@ export class RestaurantService {
       };
     }
   }
+
   async editRestaurant(
     owner: User,
     editRestaurantInput: EditRestaurantInput,
@@ -171,12 +172,13 @@ export class RestaurantService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: '카테고리 가져오기를 실패했습니다.',
       };
     }
   }
-  countRestaurants(category: Category) {
-    return this.restaurnats.count({ category });
+
+  async countRestaurants(category: Category) {
+    return await this.restaurnats.count({ category });
   }
 
   async findCategoryBySlug({
@@ -247,22 +249,20 @@ export class RestaurantService {
     page,
     limit,
   }: SearchRestaurantsInput): Promise<SearchRestaurantsOutput> {
-    const [restaurants, totalResults] = await this.restaurnats.findAndCount({
-      where: {
-        name: Raw((name) => `${name} ILIKE '%${query}%'`),
-      },
-      take: limit,
-      skip: (page - 1) * limit,
-    });
-    console.log(restaurants.length);
-
-    if (!restaurants || restaurants.length === 0) {
-      return {
-        ok: false,
-        error: '레스토랑을 찾을 수 없습니다.',
-      };
-    }
     try {
+      const [restaurants, totalResults] = await this.restaurnats.findAndCount({
+        where: {
+          name: Raw((name) => `${name} ILIKE '%${query}%'`),
+        },
+        take: limit,
+        skip: (page - 1) * limit,
+      });
+      if (!restaurants || restaurants.length === 0) {
+        return {
+          ok: false,
+          error: '레스토랑을 찾을 수 없습니다.',
+        };
+      }
       return {
         ok: true,
         restaurants,
@@ -280,35 +280,36 @@ export class RestaurantService {
     owner: User,
     createDishInput: CreateDishInput,
   ): Promise<CreateDishOutput> {
-    const restaurant = await this.restaurnats.findOne(
-      createDishInput.restaurantId,
-      { relations: ['menu'] },
-    );
-    if (!restaurant) {
-      return {
-        ok: false,
-        error: '레스토랑을 찾을 수 없습니다.',
-      };
-    }
-    if (owner.id !== restaurant.ownerId) {
-      return {
-        ok: false,
-        error: '레스토랑 소유주가 아닙니다.',
-      };
-    }
-    const isExist = restaurant.menu
-      .map((dish) => dish.name)
-      .includes(createDishInput.name);
-    if (isExist) {
-      return {
-        ok: false,
-        error: '같은 이름의 요리가 존재합니다.',
-      };
-    }
-    await this.dishes.save(
-      this.dishes.create({ ...createDishInput, restaurant }),
-    );
     try {
+      const restaurant = await this.restaurnats.findOne(
+        createDishInput.restaurantId,
+        { relations: ['menu'] },
+      );
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: '레스토랑을 찾을 수 없습니다.',
+        };
+      }
+      if (owner.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: '레스토랑 소유주가 아닙니다.',
+        };
+      }
+      const isExist = restaurant.menu
+        .map((dish) => dish.name)
+        .includes(createDishInput.name);
+      if (isExist) {
+        return {
+          ok: false,
+          error: '같은 이름의 요리가 존재합니다.',
+        };
+      }
+      await this.dishes.save(
+        this.dishes.create({ ...createDishInput, restaurant }),
+      );
+
       return {
         ok: true,
       };
@@ -356,23 +357,24 @@ export class RestaurantService {
     owner: User,
     { dishId }: DeleteDishInput,
   ): Promise<DeleteDishOutput> {
-    const dish = await this.dishes.findOne(dishId, {
-      relations: ['restaurant'],
-    });
-    if (!dish) {
-      return {
-        ok: false,
-        error: '요리를 찾을 수 없습니다.',
-      };
-    }
-    if (owner.id !== dish.restaurant.ownerId) {
-      return {
-        ok: false,
-        error: '요리 정보를 삭제할 권한이 없습니다.',
-      };
-    }
-    await this.dishes.delete(dishId);
     try {
+      const dish = await this.dishes.findOne(dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return {
+          ok: false,
+          error: '요리를 찾을 수 없습니다.',
+        };
+      }
+      if (owner.id !== dish.restaurant.ownerId) {
+        return {
+          ok: false,
+          error: '요리 정보를 삭제할 권한이 없습니다.',
+        };
+      }
+      await this.dishes.delete(dishId);
+
       return {
         ok: true,
       };
