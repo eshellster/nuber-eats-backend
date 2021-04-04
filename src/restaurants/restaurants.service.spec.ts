@@ -58,14 +58,14 @@ describe('RestaurantsService', () => {
   };
 
   const resraurantMenu = [{ name: '삼겹살' }, { name: '쭈꾸미삼겹살' }];
-  const RestaurantsResolved = {
+  const restaurantsResolved = {
     id: 1,
     ownerId: 1,
     menu: resraurantMenu,
   };
   const dishResolved = {
     id: 1,
-    restaurant: RestaurantsResolved,
+    restaurant: restaurantsResolved,
     name: '오겹살',
     price: 1,
     description: '',
@@ -405,10 +405,10 @@ describe('RestaurantsService', () => {
   describe('createDish', () => {
     const createDishesArgs = {
       ...dishResolved,
-      restaurantId: RestaurantsResolved.id,
+      restaurantId: restaurantsResolved.id,
     };
     it('성공유도: 요리생성하기', async () => {
-      restaurantsRepository.findOne.mockResolvedValue(RestaurantsResolved);
+      restaurantsRepository.findOne.mockResolvedValue(restaurantsResolved);
 
       dishesRepository.create.mockResolvedValue(dishResolved);
 
@@ -442,7 +442,7 @@ describe('RestaurantsService', () => {
       });
     });
     it('실패유도: 레스토랑 소유주와 생성자가 다른 경우', async () => {
-      restaurantsRepository.findOne.mockResolvedValue(RestaurantsResolved);
+      restaurantsRepository.findOne.mockResolvedValue(restaurantsResolved);
 
       const result = await service.createDish(
         { ...ownerResolved, id: 2 },
@@ -455,7 +455,7 @@ describe('RestaurantsService', () => {
       });
     });
     it('실패유도: 요리가 이미 존재하는 경우', async () => {
-      restaurantsRepository.findOne.mockResolvedValue(RestaurantsResolved);
+      restaurantsRepository.findOne.mockResolvedValue(restaurantsResolved);
 
       const result = await service.createDish(ownerResolved, {
         ...createDishesArgs,

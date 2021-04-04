@@ -28,7 +28,7 @@ export class OrdersService {
       if (!restaurant) {
         return {
           ok: false,
-          error: '레스토랑이 존제하지 않습니다.',
+          error: '레스토랑이 존재하지 않습니다.',
         };
       }
       let orderFinalPrice = 0;

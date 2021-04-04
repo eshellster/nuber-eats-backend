@@ -11,9 +11,6 @@ export class OrderItemOption {
 
   @Field(() => String, { nullable: true }) // 메뉴에서는 복수이지만 결정은 한가지만 해야함 -> 그냥 스트링으로 이름을 전달하면됨.
   choice: string;
-
-  @Field(() => Int, { nullable: true })
-  extra?: number;
 }
 
 @InputType('OrderItemInputType', { isAbstract: true })
