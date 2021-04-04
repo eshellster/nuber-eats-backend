@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { getConnection, Repository } from 'typeorm';
-import { User } from 'src/users/Entities/user.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Verification } from 'src/users/Entities/verification.entity';
+import { getConnection } from 'typeorm';
 
 jest.mock('got', () => {
   return {
@@ -22,7 +19,6 @@ const testUser = {
 describe('Restaurant Resolver (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
-  let usersRepository: Repository<User>;
 
   const beseTest = () => request(app.getHttpServer()).post(GRAPHQL_ENDPOINT);
   const publicTest = (query: string) => beseTest().send({ query });
