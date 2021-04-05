@@ -2,10 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
-import { RestaurantsResolve } from 'src/restaurants/restaurants.resolver';
-import { getRepository, Repository } from 'typeorm';
-import { OrderItem } from './enties/order-item.entity';
-import { Order } from './enties/order.entity';
+import { Repository } from 'typeorm';
+import { OrderItem } from './entities/order-item.entity';
+import { Order } from './entities/order.entity';
 import { OrdersService } from './orders.service';
 
 const mockRepository = () => ({
@@ -36,7 +35,6 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    ordersRepository = module.get(getRepositoryToken(Order));
     orderItemsRepository = module.get(getRepositoryToken(OrderItem));
     dishesRepository = module.get(getRepositoryToken(Dish));
     restaurantsRepository = module.get(getRepositoryToken(Restaurant));
@@ -90,7 +88,7 @@ describe('OrdersService', () => {
     dish: dishResolved,
     option: [{ name: '감자', choice: '통' }],
   };
-  describe('createOreder', () => {
+  describe('createOrder', () => {
     it('should create order', async () => {
       restaurantsRepository.findOne.mockResolvedValue({ id: 1 });
       dishesRepository.findOne.mockResolvedValue(dishResolved);
@@ -116,6 +114,64 @@ describe('OrdersService', () => {
       });
 
       expect(result).toMatchObject({ ok: true });
+    });
+    it('should not found restaurant and create order', async () => {
+      restaurantsRepository.findOne.mockResolvedValue(undefined);
+      dishesRepository.findOne.mockResolvedValue(dishResolved);
+      orderItemsRepository.create.mockReturnValue({
+        dish: dishResolved,
+        option: [],
+      });
+      orderItemsRepository.save.mockResolvedValue(orderItemResolved);
+
+      const result = await service.createOrder(customer, {
+        restaurantId: 1,
+        items: [
+          {
+            dishId: 1,
+            options: [
+              {
+                name: '감자',
+                choice: '통',
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        ok: false,
+        error: '레스토랑이 존재하지 않습니다.',
+      });
+    });
+    it('should not found dish and create order', async () => {
+      restaurantsRepository.findOne.mockResolvedValue({ id: 1 });
+      dishesRepository.findOne.mockResolvedValue(undefined);
+      orderItemsRepository.create.mockReturnValue({
+        dish: dishResolved,
+        option: [],
+      });
+      orderItemsRepository.save.mockResolvedValue(orderItemResolved);
+
+      const result = await service.createOrder(customer, {
+        restaurantId: 1,
+        items: [
+          {
+            dishId: 1,
+            options: [
+              {
+                name: '감자',
+                choice: '통',
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        ok: false,
+        error: '요리를 찾을 수 없습니다.',
+      });
     });
   });
 });

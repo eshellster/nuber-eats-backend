@@ -22,8 +22,8 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 import { AuthGuard } from './auth/auth.guard';
 import { Dish } from './restaurants/entities/dish.entity';
 import { OrdersModule } from './orders/orders.module';
-import { Order } from './orders/enties/order.entity';
-import { OrderItem } from './orders/enties/order-item.entity';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
 // console.log(Joi);
 
 @Module({
@@ -52,7 +52,7 @@ import { OrderItem } from './orders/enties/order-item.entity';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging: false,
+      logging: true,
       entities: [
         User,
         Verification,
