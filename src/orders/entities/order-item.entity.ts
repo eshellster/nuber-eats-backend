@@ -1,4 +1,4 @@
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entites/core.entity';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';

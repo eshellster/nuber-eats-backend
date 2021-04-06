@@ -115,6 +115,7 @@ export class OrderService {
           },
           relations: ['orders'],
         });
+
         orders = restaurants.map((restaurant) => restaurant.orders).flat(1);
         if (status) {
           orders = orders.filter((order) => order.status === status);
