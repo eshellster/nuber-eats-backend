@@ -5,10 +5,11 @@ import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/Entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderItem } from './entities/order-item.entity';
-import { Order } from './entities/order.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 
 @Injectable()
 export class OrderService {
@@ -169,6 +170,53 @@ export class OrderService {
       return {
         ok: true,
         order,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async editOrder(
+    user: User,
+    { id: orderId, status }: EditOrderInput,
+  ): Promise<EditOrderOutput> {
+    const order = await this.orders.findOne(orderId, {
+      relations: ['restaurant'],
+    });
+    if (!order) {
+      return {
+        ok: false,
+        error: '주문을 찾을 수 없습니다.',
+      };
+    }
+    let canEdit = false;
+    if (user.role === UserRole.Owner) {
+      if (status === OrderStatus.Cooking || status === OrderStatus.Cooked) {
+        canEdit = true;
+      }
+    } else if (user.role === UserRole.Delivery) {
+      if (status === OrderStatus.PickedUp || status === OrderStatus.Delivered) {
+        canEdit = true;
+      }
+    }
+    if (!canEdit) {
+      return {
+        ok: false,
+        error: '수정할 수 없습니다.',
+      };
+    }
+    await this.orders.save([
+      {
+        id: orderId,
+        status,
+      },
+    ]);
+    try {
+      return {
+        ok: true,
       };
     } catch (error) {
       return {
