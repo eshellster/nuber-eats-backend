@@ -5,7 +5,7 @@ import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
 import { User } from './Entities/user.entity';
 import { Verification } from './Entities/verification.entity';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 
 // 두곳에 사용되어 두번 작동했다는 오류가 발생
 // 따로 배정해주기 위해 객체를 반환하는 함수로 변경
@@ -27,8 +27,8 @@ const mockMailService = () => ({
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
-describe('UsersService', () => {
-  let service: UsersService;
+describe('UserService', () => {
+  let service: UserService;
   let usersRepository: MockRepository<User>;
   let verificationsRepository: MockRepository<Verification>;
   let mailService: MailService;
@@ -36,7 +36,7 @@ describe('UsersService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository(),
@@ -56,7 +56,7 @@ describe('UsersService', () => {
       ],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UserService>(UserService);
     mailService = module.get<MailService>(MailService);
     jwtService = module.get<JwtService>(JwtService);
     usersRepository = module.get(getRepositoryToken(User));
