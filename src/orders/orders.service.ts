@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PubSub } from 'graphql-subscriptions';
-import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
+import {
+  NEW_COOKED_ORDER,
+  NEW_PENDING_ORDER,
+  PUB_SUB,
+} from 'src/common/common.constants';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/Entities/user.entity';
@@ -190,38 +194,47 @@ export class OrderService {
     user: User,
     { id: orderId, status }: EditOrderInput,
   ): Promise<EditOrderOutput> {
-    const order = await this.orders.findOne(orderId, {
-      relations: ['restaurant'],
-    });
-    if (!order) {
-      return {
-        ok: false,
-        error: '주문을 찾을 수 없습니다.',
-      };
-    }
-    let canEdit = false;
-    if (user.role === UserRole.Owner) {
-      if (status === OrderStatus.Cooking || status === OrderStatus.Cooked) {
-        canEdit = true;
-      }
-    } else if (user.role === UserRole.Delivery) {
-      if (status === OrderStatus.PickedUp || status === OrderStatus.Delivered) {
-        canEdit = true;
-      }
-    }
-    if (!canEdit) {
-      return {
-        ok: false,
-        error: '수정할 수 없습니다.',
-      };
-    }
-    await this.orders.save([
-      {
-        id: orderId,
-        status,
-      },
-    ]);
     try {
+      const order = await this.orders.findOne(orderId);
+      if (!order) {
+        return {
+          ok: false,
+          error: '주문을 찾을 수 없습니다.',
+        };
+      }
+      let canEdit = false;
+      if (user.role === UserRole.Owner) {
+        if (status === OrderStatus.Cooking || status === OrderStatus.Cooked) {
+          canEdit = true;
+        }
+      } else if (user.role === UserRole.Delivery) {
+        if (
+          status === OrderStatus.PickedUp ||
+          status === OrderStatus.Delivered
+        ) {
+          canEdit = true;
+        }
+      }
+      if (!canEdit) {
+        return {
+          ok: false,
+          error: '수정할 수 없습니다.',
+        };
+      }
+      await this.orders.save([
+        {
+          id: orderId,
+          status,
+        },
+      ]);
+      if (user.role === UserRole.Owner) {
+        if (status === OrderStatus.Cooked) {
+          await this.pubSub.publish(NEW_COOKED_ORDER, {
+            cookedOrders: { ...order, status },
+          });
+        }
+      }
+
       return {
         ok: true,
       };
