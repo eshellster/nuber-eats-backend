@@ -5,10 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
-import { User } from './users/Entities/user.entity';
+import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { AuthModule } from './auth/auth.module';
-import { Verification } from './users/Entities/verification.entity';
+import { Verification } from './users/entities/verification.entity';
 import { MailModule } from './mail/mail.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
@@ -17,6 +17,8 @@ import { Dish } from './restaurants/entities/dish.entity';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { PaymentsModule } from './payments/payments.module';
+import { Payment } from './payments/entities/payment.entity';
 // console.log(Joi);
 
 @Module({
@@ -54,6 +56,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
         Dish,
         Order,
         OrderItem,
+        Payment,
       ],
     }),
     GraphQLModule.forRoot({
@@ -80,6 +83,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
     OrdersModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

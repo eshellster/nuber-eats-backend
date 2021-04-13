@@ -8,7 +8,7 @@ import {
 import { IsEnum, IsNumber } from 'class-validator';
 import { CoreEntity } from 'src/common/entites/core.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
-import { User } from 'src/users/Entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { User } from 'src/users/Entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';

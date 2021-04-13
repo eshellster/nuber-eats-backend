@@ -3,9 +3,9 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { getConnection, Repository } from 'typeorm';
-import { User } from 'src/users/Entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Verification } from 'src/users/Entities/verification.entity';
+import { Verification } from 'src/users/entities/verification.entity';
 
 jest.mock('got', () => {
   return {

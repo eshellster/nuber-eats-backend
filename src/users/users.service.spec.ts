@@ -3,8 +3,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
-import { User } from './Entities/user.entity';
-import { Verification } from './Entities/verification.entity';
+import { User } from './entities/user.entity';
+import { Verification } from './entities/verification.entity';
 import { UserService } from './users.service';
 
 // 두곳에 사용되어 두번 작동했다는 오류가 발생

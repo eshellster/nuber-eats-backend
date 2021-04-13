@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/Entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { Raw, Repository } from 'typeorm';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
