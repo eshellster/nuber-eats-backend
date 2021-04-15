@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, Interval, SchedulerRegistry, Timeout } from '@nestjs/schedule';
+import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
