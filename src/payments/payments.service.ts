@@ -3,7 +3,7 @@ import { Cron, Interval, SchedulerRegistry, Timeout } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import {
   CreatePaymentInput,
   CreatePaymentOutput,
@@ -41,6 +41,16 @@ export class PaymentService {
       await this.payments.save(
         this.payments.create({ transactionId, user: owner, restaurant }),
       );
+
+      restaurant.isPromoted = true;
+      const promotedUntil = restaurant.promotedUntil;
+      let date = new Date();
+      if (promotedUntil !== null) {
+        date = promotedUntil;
+      }
+      date.setDate(date.getDate() + 7);
+      restaurant.promotedUntil = date;
+      this.restaurnats.save(restaurant);
       return {
         ok: true,
       };
@@ -69,22 +79,17 @@ export class PaymentService {
     }
   }
 
-  @Cron('50 * * * * *', {
-    name: 'myJob',
-  })
-  checkForPayments() {
-    console.log('Checking for payments...(cron)');
-    const job = this.schedulerRegistry.getCronJob('myJob');
-    job.stop();
-  }
-
-  @Interval(10000)
-  checkForPaymentsI() {
-    console.log('Checking for payments...(interval)');
-  }
-
-  @Timeout(20000)
-  checkForPaymentsII() {
-    console.log('Congrats!');
+  @Interval(2000)
+  async checkPromotedRestaurants() {
+    const restaurants = await this.restaurnats.find({
+      isPromoted: true,
+      promotedUntil: LessThan(new Date()),
+    });
+    console.log(restaurants);
+    restaurants.forEach(async (restaurant) => {
+      restaurant.isPromoted = false;
+      restaurant.promotedUntil = null;
+      await this.restaurnats.save(restaurant);
+    });
   }
 }
