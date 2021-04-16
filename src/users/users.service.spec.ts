@@ -3,9 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
-import { User } from './Entities/user.entity';
-import { Verification } from './Entities/verification.entity';
-import { UsersService } from './users.service';
+import { User } from './entities/user.entity';
+import { Verification } from './entities/verification.entity';
+import { UserService } from './users.service';
 
 // 두곳에 사용되어 두번 작동했다는 오류가 발생
 // 따로 배정해주기 위해 객체를 반환하는 함수로 변경
@@ -27,8 +27,8 @@ const mockMailService = () => ({
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
-describe('UsersService', () => {
-  let service: UsersService;
+describe('UserService', () => {
+  let service: UserService;
   let usersRepository: MockRepository<User>;
   let verificationsRepository: MockRepository<Verification>;
   let mailService: MailService;
@@ -36,7 +36,7 @@ describe('UsersService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository(),
@@ -56,7 +56,7 @@ describe('UsersService', () => {
       ],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UserService>(UserService);
     mailService = module.get<MailService>(MailService);
     jwtService = module.get<JwtService>(JwtService);
     usersRepository = module.get(getRepositoryToken(User));
@@ -70,7 +70,7 @@ describe('UsersService', () => {
     const createAccountHashedPasswordArgs = {
       email: '',
       password: expect.any(String),
-      role: 0,
+      role: expect.any(String),
     };
     it('실패유도: 사용자가 존재하는 경우', async () => {
       usersRepository.findOne.mockResolvedValue({
@@ -99,7 +99,7 @@ describe('UsersService', () => {
       const result = await service.createAccount({
         email: '',
         password: '',
-        role: 0,
+        role: expect.any(String),
       });
 
       expect(usersRepository.create).toHaveBeenCalledTimes(1);
@@ -129,7 +129,7 @@ describe('UsersService', () => {
       const result = await service.createAccount({
         email: '',
         password: '',
-        role: 1,
+        role: expect.any(String),
       });
 
       expect(result).toEqual({
