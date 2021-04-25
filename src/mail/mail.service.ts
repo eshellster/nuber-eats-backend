@@ -16,6 +16,7 @@ export class MailService {
     emailVar: EmailVar[],
   ): Promise<SendEmailOutput> {
     const form = new FormData();
+    // console.log();
     form.append('from', `from edynote <mailgun@${this.options.domain}>`);
     form.append('to', emailVar[1].value);
     form.append('subject', subject);

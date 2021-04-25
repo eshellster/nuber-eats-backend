@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Raw, Repository } from 'typeorm';
-import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import {
+  AllCategoriesInput,
+  AllCategoriesOutput,
+} from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 import {
@@ -139,12 +142,12 @@ export class RestaurantService {
     }
   }
 
-  async allRestaurants({
+  async restaurants({
     page,
     limit,
   }: RestaurantsInput): Promise<RestaurantsOutput> {
     try {
-      const [restaurants, totalResults] = await this.restaurnats.findAndCount({
+      const [results, totalResults] = await this.restaurnats.findAndCount({
         order: {
           isPromoted: 'DESC',
           name: 'DESC',
@@ -154,7 +157,7 @@ export class RestaurantService {
       });
       return {
         ok: true,
-        restaurants,
+        results,
         totalPages: Math.ceil(totalResults / 25),
         totalResults,
       };
@@ -166,12 +169,24 @@ export class RestaurantService {
     }
   }
 
-  async allCategories(): Promise<AllCategoriesOutput> {
+  async allCategories({
+    page,
+    limit,
+  }: AllCategoriesInput): Promise<AllCategoriesOutput> {
     try {
-      const categories = await this.categories.find();
+      const [categories, totalResults] = await this.categories.findAndCount({
+        // order: {
+        //   isPromoted: 'DESC',
+        //   name: 'DESC',
+        // },
+        take: limit,
+        skip: (page - 1) * limit,
+      });
       return {
         ok: true,
         categories,
+        totalPages: Math.ceil(totalResults / 5),
+        totalResults,
       };
     } catch (error) {
       return {

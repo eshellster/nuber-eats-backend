@@ -46,6 +46,8 @@ export class UserService {
           user,
         }),
       );
+      console.log(verification.code);
+
       this.mailService.sendVerificationEmail(user.email, verification.code);
       return { ok: true };
     } catch (error) {
@@ -64,14 +66,14 @@ export class UserService {
       if (!user) {
         return {
           ok: false,
-          error: '사용자가 없습니다.',
+          error: '이메일 또는 비밀번호가 유효하지 않습니다',
         };
       }
       const passwordCorrect = await user.checkPassword(password);
       if (!passwordCorrect) {
         return {
           ok: false,
-          error: '비밀번호가 유효하지 않습니다.',
+          error: '이메일 또는 비밀번호가 유효하지 않습니다',
         };
       }
       const token = this.jwtService.sign(user.id);
