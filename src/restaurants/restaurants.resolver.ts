@@ -10,10 +10,7 @@ import {
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
-import {
-  AllCategoriesInput,
-  AllCategoriesOutput,
-} from './dtos/all-categories.dto';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 import {
@@ -87,10 +84,8 @@ export class CategoryResolve {
   }
 
   @Query(() => AllCategoriesOutput)
-  allCategories(
-    @Args('input') allCategoriesInput: AllCategoriesInput,
-  ): Promise<AllCategoriesOutput> {
-    return this.restaurantService.allCategories(allCategoriesInput);
+  allCategories(): Promise<AllCategoriesOutput> {
+    return this.restaurantService.allCategories();
   }
 
   @Query(() => CategoryOutput)

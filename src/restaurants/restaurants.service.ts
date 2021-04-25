@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Raw, Repository } from 'typeorm';
-import {
-  AllCategoriesInput,
-  AllCategoriesOutput,
-} from './dtos/all-categories.dto';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 import {
@@ -169,24 +166,17 @@ export class RestaurantService {
     }
   }
 
-  async allCategories({
-    page,
-    limit,
-  }: AllCategoriesInput): Promise<AllCategoriesOutput> {
+  async allCategories(): Promise<AllCategoriesOutput> {
     try {
-      const [categories, totalResults] = await this.categories.findAndCount({
-        // order: {
-        //   isPromoted: 'DESC',
-        //   name: 'DESC',
-        // },
-        take: limit,
-        skip: (page - 1) * limit,
+      const categories = await this.categories.find({
+        order: {
+          id: 'ASC',
+        },
       });
+
       return {
         ok: true,
         categories,
-        totalPages: Math.ceil(totalResults / 5),
-        totalResults,
       };
     } catch (error) {
       return {
