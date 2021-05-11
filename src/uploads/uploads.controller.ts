@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as AWS from 'aws-sdk';
-
+import { v4 as uuidv4 } from 'uuid';
 const BUCKET_NAME = 'edynote';
 
 @Controller('uploads')
@@ -14,7 +14,7 @@ export class UploadsController {
   @Post('')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file) {
-    console.log('리즌 업데이트', file);
+    // console.log('리즌 업데이트', file);
 
     AWS.config.update({
       credentials: {
@@ -23,7 +23,7 @@ export class UploadsController {
       },
     });
     try {
-      const objectName = `${Date.now() + file.originalname}`;
+      const objectName = `${Date.now() + uuidv4()}`;
       await new AWS.S3()
         .putObject({
           Body: file.buffer,
