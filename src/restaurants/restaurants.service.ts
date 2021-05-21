@@ -20,6 +20,7 @@ import {
   EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
 import { MyRestaurantsInput, MyRestaurantsOutput } from './dtos/my-restaurants';
+import { MyRestaurantInput, MyRestaurantOutput } from './dtos/myRestaurant';
 
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
@@ -55,6 +56,7 @@ export class RestaurantService {
       await this.restaurants.save(newRestaurant);
       return {
         ok: true,
+        restaurantId: newRestaurant.id,
       };
     } catch (error) {
       return {
@@ -169,6 +171,33 @@ export class RestaurantService {
     }
   }
 
+  async myRestaurant(
+    owner: User,
+    { id }: MyRestaurantInput,
+  ): Promise<MyRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne(
+        { owner, id },
+        { relations: ['category', 'menu', 'orders'] },
+      );
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: '레스토랑을 찾을 수 없습니다.',
+        };
+      }
+      return {
+        restaurant,
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
   async myRestaurants(
     owner: User,
     { page, limit }: MyRestaurantsInput,
@@ -180,7 +209,7 @@ export class RestaurantService {
         },
         relations: ['category'],
         order: {
-          isPromoted: 'DESC',
+          createAt: 'DESC',
         },
         take: limit,
         skip: (page - 1) * limit,
