@@ -53,18 +53,17 @@ export class OrderService {
             error: '요리를 찾을 수 없습니다.',
           };
         }
-        let dishFinalPrice = dish.price;
+        let dishFinalPrice = dish.price * item.orderSize;
         for (const orderItemOption of item.options) {
           const dishOption = dish.options.find(
             (options) => options.name === orderItemOption.name,
           );
           if (dishOption) {
             if (dishOption.extra) {
-              dishFinalPrice = dishFinalPrice + dishOption.extra;
+              dishFinalPrice =
+                dishFinalPrice + dishOption.extra * orderItemOption.orderSize;
             }
-            const dishOptionChoice = dishOption.choices?.find(
-              (choices) => choices.name === orderItemOption.choice,
-            );
+            const dishOptionChoice = dishOption.choices[0];
             if (dishOptionChoice?.extra) {
               dishFinalPrice = dishFinalPrice + dishOptionChoice.extra;
             }
@@ -75,6 +74,7 @@ export class OrderService {
           this.orderItems.create({
             dish,
             options: item.options,
+            orderSize: item.orderSize,
           }),
         );
         orderItems.push(orderItem);
@@ -94,6 +94,7 @@ export class OrderService {
 
       return {
         ok: true,
+        orderId: order.id,
       };
     } catch (error) {
       return {

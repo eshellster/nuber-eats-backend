@@ -69,6 +69,7 @@ export class Dish extends CoreEntity {
   })
   restaurant: Restaurant;
 
+  @Field(() => Int)
   @RelationId((dish: Dish) => dish.restaurant)
   restaurantId: number;
 

@@ -176,10 +176,13 @@ export class RestaurantService {
     { id }: MyRestaurantInput,
   ): Promise<MyRestaurantOutput> {
     try {
-      const restaurant = await this.restaurants.findOne(
-        { owner, id },
-        { relations: ['category', 'menu', 'orders'] },
-      );
+      const restaurant = await this.restaurants.findOne({
+        where: { owner, id },
+        order: {
+          name: 'DESC',
+        },
+        relations: ['category', 'menu', 'orders'],
+      });
       if (!restaurant) {
         return {
           ok: false,
@@ -209,7 +212,7 @@ export class RestaurantService {
         },
         relations: ['category'],
         order: {
-          createAt: 'DESC',
+          name: 'DESC',
         },
         take: limit,
         skip: (page - 1) * limit,

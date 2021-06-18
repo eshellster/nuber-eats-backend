@@ -1,7 +1,14 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entites/core.entity';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
+
+@InputType('OrderChoiceInputType', { isAbstract: true })
+@ObjectType()
+export class OrderChoice {
+  @Field(() => String)
+  name: string;
+}
 
 @InputType('OrderItemOptionInputType', { isAbstract: true })
 @ObjectType()
@@ -9,8 +16,11 @@ export class OrderItemOption {
   @Field(() => String)
   name: string;
 
-  @Field(() => String, { nullable: true }) // 메뉴에서는 복수이지만 결정은 한가지만 해야함 -> 그냥 스트링으로 이름을 전달하면됨.
-  choice: string;
+  @Field(() => Int)
+  orderSize?: number;
+
+  @Field(() => [OrderChoice], { nullable: true })
+  choices?: OrderChoice[];
 }
 
 @InputType('OrderItemInputType', { isAbstract: true })
@@ -24,4 +34,8 @@ export class OrderItem extends CoreEntity {
   @Field(() => [OrderItemOption], { nullable: true })
   @Column({ type: 'json', nullable: true })
   options?: OrderItemOption[];
+
+  @Field(() => Int)
+  @Column()
+  orderSize?: number;
 }
