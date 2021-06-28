@@ -174,13 +174,15 @@ export class OrderService {
       } else if (
         user.role === UserRole.Owner &&
         order.restaurant.ownerId === user.id
-      )
-        if (!canSee) {
-          return {
-            ok: false,
-            error: '해당 내용을 볼수 없습니다.',
-          };
-        }
+      ) {
+        canSee = true;
+      }
+      if (!canSee) {
+        return {
+          ok: false,
+          error: '해당 내용을 볼수 없습니다.',
+        };
+      }
       return {
         ok: true,
         order,
